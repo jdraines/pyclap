@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "quickparser"
-version = "0.1.0"
+version = "0.1.1"
 description = "Create lightweight CLI arg parsers from pydantic models"
 authors = [
     { name = "John Raines", email = "johndanielraines@gmail.com" }
@@ -13,6 +13,7 @@ license = { text = "MIT" }
 dependencies = [
     "pydantic>=2.11"
 ]
+readme = "README.md"
 
 [project.optional-dependencies]
 dev = [

@@ -29,15 +29,18 @@ class Parser(Generic[T]):
         """
         parser = argparse.ArgumentParser(description=model.__doc__)
         for field_name, field in model.model_fields.items():
-            is_optional = _field_is_optional(field)
-            _type = _get_type(field)
-            default = _get_default(field)
+            kwargs = {}
+            if (_type := _get_type(field)):
+                kwargs['type'] = _type
+            if (default := _get_default(field)):
+                kwargs['default'] = default
+            if _is_bool(field):
+                kwargs['action'] = 'store_true'
             parser.add_argument(
-                f'--{field_name}',
-                type=_type,
-                default=default,
-                required=not is_optional,
-                help=field.description or ''
+                f'--{snake_to_kebab_case(field_name)}',
+                required=not _field_is_optional(field),
+                help=field.description or '',
+                **kwargs
             )
         return parser
 
@@ -76,7 +79,8 @@ def _field_is_optional(field: Field) -> bool:
     return any([
         _field_is_explicitly_optional(field),
         _has_default(field),
-        (_field_is_explicitly_optional(field) and _default_is_undefined(field))
+        (_field_is_explicitly_optional(field) and _default_is_undefined(field)),
+        _is_bool(field),
     ])
 
 
@@ -117,6 +121,8 @@ def _get_type(field: FieldInfo) -> type:
             _type = field.annotation
         else:
             _type = None
+    if _type is bool:
+        return None
     return _type
 
 
@@ -139,3 +145,23 @@ def _default_is_undefined(field: FieldInfo) -> bool:
     Check if a field's default value is undefined.
     """
     return isinstance(field.default, PydanticUndefinedType)
+
+
+def _is_bool(field: FieldInfo) -> bool:
+    """
+    Check if a field is a boolean.
+    """
+    if field.annotation is bool:
+        return True
+    elif _field_is_explicitly_optional(field):
+        _type = field.annotation.__args__[0]
+        if _type is type(None):
+            _type = field.annotation.__args__[1]
+        return _type is bool
+
+
+def snake_to_kebab_case(string: str) -> str:
+    """
+    Convert a string from snake_case to kebab-case.
+    """
+    return string.replace('_', '-')
