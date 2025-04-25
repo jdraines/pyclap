@@ -51,6 +51,18 @@ class Parser(Generic[T]):
         """
         return cls._parser.parse_args()
 
+    @classmethod
+    def from_args(cls):
+        """
+        Create an instance of the model from the parsed arguments.
+        """
+
+        args = cls.parse()
+        params = {}
+        for field_name, _ in cls._model.model_fields.items():
+            params[field_name] = getattr(args, field_name)
+
+        return cls._model(**params)
 
 def parser(cls=None, **kwargs) -> Parser[T]:
     """
