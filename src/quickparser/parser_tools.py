@@ -1,6 +1,6 @@
 import sys
-
 from typing import TypeVar, Generic, Union
+from functools import wraps
 
 UnionType = Union
 is_ge_310 = False
@@ -19,6 +19,8 @@ T = TypeVar('T', bound=type[BaseModel])
 class Parser(Generic[T]):
 
     _model: T = None
+    _parser: argparse.ArgumentParser = None
+
 
     @classmethod
     def _init_parser(cls, model: T) -> argparse.ArgumentParser:
@@ -44,19 +46,27 @@ class Parser(Generic[T]):
         """
         Parse the command line arguments.
         """
-        parser = cls._init_parser(cls._model)
-        return parser.parse_args()
+        return cls._parser.parse_args()
 
 
-def parser(cls) -> Parser[T]:
+def parser(cls=None, **kwargs) -> Parser[T]:
     """
     Decorator to create a parser for a Pydantic model.
     """
-    return type(cls.__name__, (Parser,), {
-        '_model': cls,
-        '__doc__': cls.__doc__,
-        '__module__': cls.__module__,
-    })
+    def decorator(cls: T) -> Parser[T]:
+        @wraps(cls)
+        def wrapper(**kwargs) -> Parser[T]:
+            argparser = Parser._init_parser(cls)
+            return type(cls.__name__, (Parser,), {
+                '_model': cls,
+                '_parser': argparser,
+                '__doc__': cls.__doc__,
+                '__module__': cls.__module__,
+            })
+        return wrapper(**kwargs)
+    if cls is None:
+        return decorator
+    return decorator(cls)
 
 
 def _field_is_optional(field: Field) -> bool:

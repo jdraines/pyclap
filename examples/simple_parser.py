@@ -16,4 +16,4 @@ if __name__ == "__main__":
     args = SimpleModel.parse()
     print(args)
     for arg, val in vars(args).items():
-        print(f"{arg} of type {type(val).__name__}: {val}")
+        print(f"    {arg} of type {type(val).__name__}: {val}")

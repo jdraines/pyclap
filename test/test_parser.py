@@ -3,7 +3,7 @@ import argparse
 from unittest.mock import patch
 from pydantic import BaseModel, Field
 from pydantic_core import PydanticUndefined
-from pyclap import parser_tools as pt
+from quickparser import parser_tools as pt
 from typing import Union, Optional
 
 
@@ -105,7 +105,15 @@ class TestParser:
     """
 
     @pytest.fixture
-    def parser_cls(self):
+    def argparser(self):
+        """
+        Fixture to provide the argument parser.
+        """
+        return pt.Parser._init_parser(_TestModel)
+
+
+    @pytest.fixture
+    def parser_cls(self, argparser):
         """
         Fixture to provide the parser class.
         """
@@ -113,6 +121,7 @@ class TestParser:
             """
             Example parser for testing.
             """
+            _parser = argparser
             _model = _TestModel
         return _TestParser
     
@@ -121,15 +130,6 @@ class TestParser:
         """
         Test the parser class creation.
         """
-        parser = parser_cls._init_parser(parser_cls._model)
-        assert isinstance(parser, argparse.ArgumentParser)
-        args = parser.parse_args()
-        assert args.name == "John"
-        assert args.age == 25
-        assert args.hobby is None
-        assert args.favorite_color == "blue"
-        assert args.favorite_number is None
-
         args = parser_cls.parse()
         assert args.name == "John"
         assert args.age == 25
@@ -138,6 +138,14 @@ class TestParser:
         assert args.favorite_number is None
         assert args.is_strange is None
         assert args.favorite_color == "blue"
+
+    def test_init_parser(self, parser_cls):
+        """
+        Test the _init_parser function.
+        """
+        parser = parser_cls._init_parser(parser_cls._model)
+        assert isinstance(parser, argparse.ArgumentParser)
+
 
 def test_parser_class_decorator():
     """
@@ -149,5 +157,3 @@ def test_parser_class_decorator():
     assert parser._model == _TestModel
     assert parser.__doc__ == _TestModel.__doc__
     assert parser.__module__ == _TestModel.__module__
-
-    

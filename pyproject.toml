@@ -3,7 +3,7 @@ requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "pyclap"
+name = "quickparser"
 version = "0.1.0"
 description = "Create lightweight CLI arg parsers from pydantic models"
 authors = [
@@ -11,8 +11,11 @@ authors = [
 ]
 license = { text = "MIT" }
 dependencies = [
-    "pydantic"
+    "pydantic>=2.11"
 ]
 
-[tool.optional-dependencies]
-dev = ["pytest"]
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3.5",
+    "pytest-cov>=6.1.1"
+]
