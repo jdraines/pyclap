@@ -59,7 +59,7 @@ def test_get_type(fields):
     assert pt._get_type(fields["age"]) == int
     assert pt._get_type(fields["favorite_color"]) == str
     assert pt._get_type(fields["favorite_number"]) == int
-    assert pt._get_type(fields["is_strange"]) == bool
+    assert pt._get_type(fields["is_strange"]) == None
 
 
 def test_get_default(fields):
@@ -125,7 +125,7 @@ class TestParser:
             _model = _TestModel
         return _TestParser
     
-    @patch("sys.argv", new=["test_parser.py", "--name", "John", "--age", "25"])
+    @patch("sys.argv", new=["test_parser.py", "--name", "John", "--age", "25", "--is-strange"])
     def test_parser_class(self, parser_cls):
         """
         Test the parser class creation.
@@ -136,7 +136,7 @@ class TestParser:
         assert args.hobby is None
         assert args.favorite_color == "blue"
         assert args.favorite_number is None
-        assert args.is_strange is None
+        assert args.is_strange is True
         assert args.favorite_color == "blue"
 
     def test_init_parser(self, parser_cls):
