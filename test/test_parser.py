@@ -139,6 +139,18 @@ class TestParser:
         assert args.is_strange is True
         assert args.favorite_color == "blue"
 
+    @patch("sys.argv", new=["test_parser.py", "--name", "Perry", "--age", "15", "--is-strange"])
+    def test_parser_class_from_args(self, parser_cls):
+        @pt.parser
+        class Person(BaseModel):
+            name: str
+            age: int
+            is_strange: None | bool
+
+        o = Person.from_args()
+        assert o.name == "Perry"
+        assert o.age == 15
+
     def test_init_parser(self, parser_cls):
         """
         Test the _init_parser function.
