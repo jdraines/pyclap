@@ -3,7 +3,7 @@ from pyclap import parser
 
 
 @parser
-class ExampleModel(BaseModel):
+class SimpleModel(BaseModel):
     """
     Example model for demonstration.
     """
@@ -13,7 +13,7 @@ class ExampleModel(BaseModel):
 
 
 if __name__ == "__main__":
-    args = ExampleModel.parse()
+    args = SimpleModel.parse()
     print(args)
     for arg, val in vars(args).items():
         print(f"{arg} of type {type(val).__name__}: {val}")
