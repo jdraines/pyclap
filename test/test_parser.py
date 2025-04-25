@@ -139,17 +139,25 @@ class TestParser:
         assert args.is_strange is True
         assert args.favorite_color == "blue"
 
-    @patch("sys.argv", new=["test_parser.py", "--name", "Perry", "--age", "15", "--is-strange"])
+    @patch("sys.argv", new=["test_parser.py", "--last-name", "Lee", "--first-name", "Perry", "--age", "15", "--is-strange"])
     def test_parser_class_from_args(self, parser_cls):
         @pt.parser
         class Person(BaseModel):
-            name: str
+            last_name: str
+            first_name: str
             age: int
             is_strange: None | bool
 
+            @property
+            def full_name(self):
+                return f"{self.first_name} {self.last_name}"
+
         o = Person.from_args()
-        assert o.name == "Perry"
+        assert o.first_name == "Perry"
+        assert o.last_name == "Lee"
         assert o.age == 15
+        assert o.full_name == "Perry Lee"
+        assert o.is_strange is True
 
     def test_init_parser(self, parser_cls):
         """
