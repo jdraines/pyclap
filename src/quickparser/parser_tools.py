@@ -1,5 +1,5 @@
 import sys
-from typing import TypeVar, Generic, Union
+from typing import TypeVar, Generic, Union, ClassVar
 from functools import wraps
 
 UnionType = Union
@@ -13,21 +13,20 @@ from pydantic import BaseModel, Field
 from pydantic_core import PydanticUndefinedType
 from pydantic.fields import FieldInfo
 
-T = TypeVar('T', bound=type[BaseModel])
 
+class ParserModel(BaseModel):
 
-class Parser(Generic[T]):
-
-    _model: T = None
-    _parser: argparse.ArgumentParser = None
+    _parser: ClassVar[argparse.ArgumentParser] = None
 
 
     @classmethod
-    def _init_parser(cls, model: T) -> argparse.ArgumentParser:
+    def _init_argparser(cls, model: type[BaseModel], **kwargs) -> argparse.ArgumentParser:
         """
         Initialize the argument parser.
         """
-        parser = argparse.ArgumentParser(description=model.__doc__)
+        if "description" not in kwargs:
+            kwargs["description"] = model.__doc__ or ''
+        parser = argparse.ArgumentParser(**kwargs)
         for field_name, field in model.model_fields.items():
             kwargs = {}
             if (_type := _get_type(field)):
@@ -56,28 +55,23 @@ class Parser(Generic[T]):
         """
         Create an instance of the model from the parsed arguments.
         """
-
         args = cls.parse()
         params = {}
-        for field_name, _ in cls._model.model_fields.items():
+        for field_name, _ in cls.model_fields.items():
             params[field_name] = getattr(args, field_name)
+        return cls(**params)
 
-        return cls._model(**params)
-
-def parser(cls=None, **kwargs) -> Parser[T]:
+def parser(cls=None, **kwargs) -> ParserModel:
     """
     Decorator to create a parser for a Pydantic model.
     """
-    def decorator(cls: T) -> Parser[T]:
+    def decorator(cls: type[BaseModel]) -> ParserModel:
         @wraps(cls)
-        def wrapper(**kwargs) -> Parser[T]:
-            argparser = Parser._init_parser(cls)
-            return type(cls.__name__, (Parser,), {
-                '_model': cls,
-                '_parser': argparser,
-                '__doc__': cls.__doc__,
-                '__module__': cls.__module__,
-            })
+        def wrapper(**kwargs) -> ParserModel:
+            argparser = ParserModel._init_argparser(cls, **kwargs)
+            class_state = cls.__dict__.copy()
+            class_state['_parser'] = argparser
+            return type(cls.__name__, (ParserModel,), class_state)
         return wrapper(**kwargs)
     if cls is None:
         return decorator

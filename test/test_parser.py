@@ -109,7 +109,7 @@ class TestParser:
         """
         Fixture to provide the argument parser.
         """
-        return pt.Parser._init_parser(_TestModel)
+        return pt.ParserModel._init_argparser(_TestModel)
 
 
     @pytest.fixture
@@ -117,7 +117,7 @@ class TestParser:
         """
         Fixture to provide the parser class.
         """
-        class _TestParser(pt.Parser):
+        class _TestParser(pt.ParserModel):
             """
             Example parser for testing.
             """
@@ -159,11 +159,11 @@ class TestParser:
         assert o.full_name == "Perry Lee"
         assert o.is_strange is True
 
-    def test_init_parser(self, parser_cls):
+    def test_init_argparser(self, parser_cls):
         """
         Test the _init_parser function.
         """
-        parser = parser_cls._init_parser(parser_cls._model)
+        parser = parser_cls._init_argparser(_TestModel)
         assert isinstance(parser, argparse.ArgumentParser)
 
 
@@ -173,7 +173,6 @@ def test_parser_class_decorator():
     """
     parser = pt.parser(_TestModel)
     assert parser.__name__ == "_TestModel"
-    assert issubclass(parser, pt.Parser)
-    assert parser._model == _TestModel
+    assert issubclass(parser, pt.ParserModel)
     assert parser.__doc__ == _TestModel.__doc__
     assert parser.__module__ == _TestModel.__module__

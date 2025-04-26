@@ -1,1 +1,1 @@
-from .parser_tools import parser, Parser
+from .parser_tools import parser, ParserModel
