@@ -16,14 +16,8 @@ project:
       name: pyproject
 
   stages:
-
-    dev:
-      rules:
-        current:
-          - regex_dev_mmp
     prod:
       aliases:
-        - string:stable
         - string:latest
         - major.minor
       rules:
