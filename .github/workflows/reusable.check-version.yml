@@ -18,9 +18,5 @@ jobs:
           python-version: 3.11
       - name: install dependencies
         run: pip install vertagus
-      - name: run dev version check
-        if: ${{ !startsWith( github.head_ref, 'release/' ) && !startsWith( github.head_ref, 'hotfix/' ) }}
-        run: vertagus validate -c ${{ inputs.config_file }} -s dev
       - name: run prod version check
-        if: ${{ startsWith( github.head_ref, 'release/' ) || startsWith( github.head_ref, 'hotfix/' ) }}
         run: vertagus validate -c ${{ inputs.config_file }} -s prod
